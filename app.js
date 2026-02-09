@@ -68,8 +68,6 @@ function initApp() {
   setupEventListeners();
   loadUserData();
   updateDisplay();
-  // Initialiser Firebase (la sync démarre après connexion Google)
-  if (typeof initFirebase === 'function') initFirebase();
 }
 
 // ============================================
@@ -94,8 +92,6 @@ function loadCategories() {
 function saveCategories() {
   localStorage.setItem('customCategories', JSON.stringify(CATEGORIES));
   console.log('✅ Catégories sauvegardées');
-  // Synchroniser avec Firebase si connecté
-  if (typeof pushToFirebase === 'function') pushToFirebase();
 }
 
 function resetCategories() {
@@ -292,17 +288,31 @@ function exportToCSV() {
 // ============================================
 
 function renderStatistics() {
+  const mode = document.querySelector('.stats-mode-btn.active')?.dataset.mode || 'year';
   const year1 = parseInt(document.getElementById('compare-year-1').value);
   const year2 = parseInt(document.getElementById('compare-year-2').value);
   
-  document.getElementById('year1-header').textContent = year1;
-  document.getElementById('year2-header').textContent = year2;
+  let stats1, stats2, label1, label2;
   
-  const stats1 = calculateYearStats(year1);
-  const stats2 = calculateYearStats(year2);
+  if (mode === 'month') {
+    const month1 = parseInt(document.getElementById('compare-month-1').value);
+    const month2 = parseInt(document.getElementById('compare-month-2').value);
+    stats1 = calculateMonthStats(year1, month1);
+    stats2 = calculateMonthStats(year2, month2);
+    label1 = `${MONTHS_SHORT[month1]} ${year1}`;
+    label2 = `${MONTHS_SHORT[month2]} ${year2}`;
+  } else {
+    stats1 = calculateYearStats(year1);
+    stats2 = calculateYearStats(year2);
+    label1 = String(year1);
+    label2 = String(year2);
+  }
   
-  renderComparisonTable(stats1, stats2, year1, year2);
-  renderComparisonCharts(stats1, stats2, year1, year2);
+  document.getElementById('year1-header').textContent = label1;
+  document.getElementById('year2-header').textContent = label2;
+  
+  renderComparisonTable(stats1, stats2, label1, label2);
+  renderComparisonCharts(stats1, stats2, label1, label2);
 }
 
 function calculateYearStats(year) {
@@ -325,7 +335,27 @@ function calculateYearStats(year) {
   return stats;
 }
 
-function renderComparisonTable(stats1, stats2, year1, year2) {
+function calculateMonthStats(year, month) {
+  const stats = {};
+  
+  Object.keys(CATEGORIES).forEach(type => {
+    let total = 0;
+    
+    CATEGORIES[type].forEach(category => {
+      const transactions = state.transactions.filter(t => {
+        const d = new Date(t.date);
+        return d.getFullYear() === year && d.getMonth() === month && t.type === type && t.category === category;
+      });
+      total += transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    });
+    
+    stats[type] = total;
+  });
+  
+  return stats;
+}
+
+function renderComparisonTable(stats1, stats2, label1, label2) {
   const tbody = document.getElementById('comparison-table-body');
   if (!tbody) return;
   tbody.innerHTML = '';
@@ -378,12 +408,12 @@ function renderComparisonTable(stats1, stats2, year1, year2) {
   });
 }
 
-function renderComparisonCharts(stats1, stats2, year1, year2) {
-  renderBarChart(stats1, stats2, year1, year2);
-  renderLineChart(stats1, stats2, year1, year2);
+function renderComparisonCharts(stats1, stats2, label1, label2) {
+  renderBarChart(stats1, stats2, label1, label2);
+  renderLineChart(stats1, stats2, label1, label2);
 }
 
-function renderBarChart(stats1, stats2, year1, year2) {
+function renderBarChart(stats1, stats2, label1, label2) {
   const canvas = document.getElementById('chart-comparison-bars');
   if (!canvas) return;
   
@@ -398,7 +428,7 @@ function renderBarChart(stats1, stats2, year1, year2) {
       labels: ['Revenus', 'Dépenses Totales'],
       datasets: [
         {
-          label: year1,
+          label: label1,
           data: [
             stats1.Revenus || 0,
             (stats1.Charges_fixes || 0) + (stats1.Essentiel || 0) + (stats1.Extras || 0)
@@ -406,7 +436,7 @@ function renderBarChart(stats1, stats2, year1, year2) {
           backgroundColor: COLORS.revenus
         },
         {
-          label: year2,
+          label: label2,
           data: [
             stats2.Revenus || 0,
             (stats2.Charges_fixes || 0) + (stats2.Essentiel || 0) + (stats2.Extras || 0)
@@ -443,7 +473,7 @@ function renderBarChart(stats1, stats2, year1, year2) {
   });
 }
 
-function renderLineChart(stats1, stats2, year1, year2) {
+function renderLineChart(stats1, stats2, label1, label2) {
   const canvas = document.getElementById('chart-comparison-line');
   if (!canvas) return;
   
@@ -458,7 +488,7 @@ function renderLineChart(stats1, stats2, year1, year2) {
       labels: ['Revenus', 'Charges fixes', 'Essentiel', 'Extras', 'Épargne'],
       datasets: [
         {
-          label: year1,
+          label: label1,
           data: [
             stats1.Revenus || 0,
             stats1.Charges_fixes || 0,
@@ -472,7 +502,7 @@ function renderLineChart(stats1, stats2, year1, year2) {
           fill: true
         },
         {
-          label: year2,
+          label: label2,
           data: [
             stats2.Revenus || 0,
             stats2.Charges_fixes || 0,
@@ -600,13 +630,31 @@ function setupEventListeners() {
     exportCsvBtn.addEventListener('click', exportToCSV);
   }
   
-  // 🆕 STATISTIQUES - Sélecteurs années
+  // 🆕 STATISTIQUES - Sélecteurs années + mois + mode
   const compareYear1 = document.getElementById('compare-year-1');
   const compareYear2 = document.getElementById('compare-year-2');
-  if (compareYear1 && compareYear2) {
-    compareYear1.addEventListener('change', renderStatistics);
-    compareYear2.addEventListener('change', renderStatistics);
-  }
+  const compareMonth1 = document.getElementById('compare-month-1');
+  const compareMonth2 = document.getElementById('compare-month-2');
+  
+  if (compareYear1) compareYear1.addEventListener('change', renderStatistics);
+  if (compareYear2) compareYear2.addEventListener('change', renderStatistics);
+  if (compareMonth1) compareMonth1.addEventListener('change', renderStatistics);
+  if (compareMonth2) compareMonth2.addEventListener('change', renderStatistics);
+  
+  // Toggle mode année / mois
+  document.querySelectorAll('.stats-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.stats-mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      const isMonth = btn.dataset.mode === 'month';
+      document.querySelectorAll('.stats-month-select').forEach(sel => {
+        sel.style.display = isMonth ? 'inline-block' : 'none';
+      });
+      
+      renderStatistics();
+    });
+  });
   
   // 🆕 PARAMÈTRES - Boutons
   document.querySelectorAll('.btn-add-category').forEach(btn => {
@@ -839,14 +887,10 @@ function initializeBudgetsForYear(year) {
 
 function saveTransactions() {
   localStorage.setItem('transactions', JSON.stringify(state.transactions));
-  // Synchroniser avec Firebase si connecté
-  if (typeof pushToFirebase === 'function') pushToFirebase();
 }
 
 function saveBudgets() {
   localStorage.setItem('budgets', JSON.stringify(state.budgets));
-  // Synchroniser avec Firebase si connecté
-  if (typeof pushToFirebase === 'function') pushToFirebase();
 }
 
 function updateDisplay() {
@@ -1083,22 +1127,23 @@ function updateDashboard() {
     depensesSubtitle.textContent = `Fixes restant: ${formatCurrency(fixesRestant)} €`;
   }
   
-  const epargneNetteMensuelle = state.transactions
+  const epargnePositiveMensuelle = state.transactions
     .filter(t => {
       const d = new Date(t.date);
       return d.getFullYear() === state.currentYear && 
              d.getMonth() === state.currentMonth &&
-             t.type === 'Epargne';
+             t.type === 'Epargne' && 
+             t.amount > 0;
     })
     .reduce((sum, t) => sum + t.amount, 0);
   
-  const soldeDisponible = revenusReelMensuel - chargesPrevuMensuel - essentielReelMensuel - extrasReelMensuel - epargneNetteMensuelle;
+  const soldeDisponible = revenusReelMensuel - chargesPrevuMensuel - essentielReelMensuel - extrasReelMensuel - epargnePositiveMensuelle;
   
   const soldeDispEl = document.getElementById('stat-disponible');
   soldeDispEl.textContent = `${formatCurrency(soldeDisponible)} €`;
   soldeDispEl.style.color = soldeDisponible >= 0 ? '#000000' : '#CC0066';
   
-  const soldeCCP = revenusReelMensuel - chargesReelMensuel - essentielReelMensuel - extrasReelMensuel - epargneNetteMensuelle;
+  const soldeCCP = revenusReelMensuel - chargesReelMensuel - essentielReelMensuel - extrasReelMensuel - epargnePositiveMensuelle;
   
   const epargneAnnuelReel = calculateAnnualEpargneReel();
   
@@ -1702,7 +1747,7 @@ function editTransaction(id) {
   document.getElementById('trans-type').value = trans.type;
   updateCategoryOptions();
   document.getElementById('trans-category').value = trans.category;
-  document.getElementById('trans-amount').value = trans.type === 'Epargne' ? trans.amount.toFixed(2) : Math.abs(trans.amount).toFixed(2);
+  document.getElementById('trans-amount').value = Math.abs(trans.amount).toFixed(2);
   document.getElementById('trans-comment').value = trans.comment;
   document.getElementById('transaction-form').style.display = 'flex';
   
@@ -1997,7 +2042,7 @@ function renderBudgetTables() {
             }
         }
 
-        rowHTML_reel += `<td class="${cellClass}" style="${colorStyle}">${reelAmount < 0 && type === 'Epargne' ? '-' : ''}${formatCurrency(Math.abs(reelAmount))} €</td>`;
+        rowHTML_reel += `<td class="${cellClass}" style="${colorStyle}">${formatCurrency(Math.abs(reelAmount))} €</td>`;
       }
 
       totalAnnualReel += categoryAnnualReel;
@@ -2007,7 +2052,7 @@ function renderBudgetTables() {
         annualReelDisplay = epargneAnnuelReel[category] || 0;
       }
 
-      rowHTML_reel += `<td class="total-annual-cell-reel">${annualReelDisplay < 0 && type === 'Epargne' ? '-' : ''}${formatCurrency(Math.abs(annualReelDisplay))} €</td>`;
+      rowHTML_reel += `<td class="total-annual-cell-reel">${formatCurrency(Math.abs(annualReelDisplay))} €</td>`;
       rowHTML_reel += `<td></td>`; 
       rowHTML_reel += `</tr>`;
 
