@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Gestionnaire budgétaire personnel">
+  <meta name="theme-color" content="#4EA09C">
+  <title>Aux Petits des Oiseaux</title>
+  <link rel="stylesheet" href="style.css?v=70">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Firebase SDK (synchronisation multi-appareils) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div id="app" class="min-h-screen bg-gray-100" style="display:block;">
+    <nav class="navbar">
+      <div class="nav-container">
+        <h1 class="nav-title">
+          <img src="icon-192.png" alt="Budget" class="wallet-icon" width="24" height="24">
+          Budget <span id="nav-year">2025</span>
+        </h1>
+        <div class="nav-controls">
+          <select id="year-select" class="year-select">
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+            <option value="2030">2030</option>
+          </select>
+          
+          <div class="nav-spacer"></div>
+          
+          <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="dashboard">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+              </svg>
+              Dashboard
+            </button>
+            <button class="nav-tab" data-tab="transactions">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              Transactions
+            </button>
+            <button class="nav-tab" data-tab="budget">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Budget
+            </button>
+          </div>
+          
+          <div class="nav-spacer"></div>
+          
+          <button id="import-data-btn-navbar" class="btn-import-navbar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Importer
+          </button>
+          <button id="export-data-btn-navbar" class="btn-export-navbar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Exporter
+          </button>
+          
+          <div class="nav-spacer"></div>
+          
+          <button id="export-csv-btn-navbar" class="btn-export-csv-navbar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <line x1="9" y1="15" x2="15" y2="15"></line>
+            </svg>
+            CSV
+          </button>
+          <button class="nav-tab" data-tab="statistics">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="20" x2="12" y2="10"></line>
+              <line x1="18" y1="20" x2="18" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="16"></line>
+            </svg>
+            Stats
+          </button>
+          <button class="nav-tab" data-tab="settings">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M12 1v6m0 6v6"></path>
+              <path d="M21 12h-6m-6 0H3"></path>
+            </svg>
+            Config
+          </button>
+          
+          <div class="nav-spacer"></div>
+          
+          <button id="sync-auth-btn" class="btn-sync-navbar" title="Synchroniser avec Google">
+            <span class="sync-dot sync-offline" id="sync-indicator" title="Non connecté"></span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+            </svg>
+            Sync
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <div id="dashboard-tab" class="tab-content active">
+        <div class="dashboard-header-gradient">
+          <div class="dashboard-month-info">
+            <h2 id="dashboard-month-title">Décembre<br>2025</h2>
+            <select id="month-select" class="month-select-glass">
+              <option value="0">Janvier</option><option value="1">Février</option><option value="2">Mars</option><option value="3">Avril</option><option value="4">Mai</option><option value="5">Juin</option><option value="6">Juillet</option><option value="7">Août</option><option value="8">Septembre</option><option value="9">Octobre</option><option value="10">Novembre</option><option value="11">Décembre</option>
+            </select>
+          </div>
+          <button id="dashboard-new-transaction-btn" class="btn-primary-icon dashboard-new-transaction-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Nouvelle Transaction
+          </button>
+        </div>
+        
+        <div class="stats-grid-dashboard stats-grid-dashboard-grouped">
+          <div class="stat-group stat-group-bordered-orange">
+            <div class="stat-group-content">
+              <div class="stat-mini">
+                <div class="stat-label-tiny">Solde Disponible</div>
+                <div id="stat-disponible" class="stat-value-medium">0.00 €</div>
+              </div>
+              <div class="stat-mini stat-mini-with-button">
+                <div class="stat-mini-left">
+                  <div class="stat-label-tiny">Solde CCP</div>
+                  <div id="solde-ccp" class="stat-value-medium">0.00 €</div>
+                  <canvas id="sparkline-ccp" height="18"></canvas>
+                </div>
+                <button id="report-solde-btn" class="btn-report-solde-mini" title="Reporter le solde CCP">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                  Reporter
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-group">
+            <div class="stat-group-content">
+              <div class="stat-mini stat-mini-bordered-depenses">
+                <div class="stat-label-tiny">Dépenses Totales</div>
+                <div id="stat-depenses" class="stat-value-medium">0.00 €</div>
+                <div class="budget-progress-bar">
+                  <div id="budget-progress-fill" class="budget-progress-fill" style="width: 0%;"></div>
+                </div>
+                <div class="stat-subtitle-micro">Fixes restant: 0.00 €</div>
+              </div>
+              <div class="stat-mini stat-mini-bordered-revenus">
+                <div class="stat-label-tiny">Revenu Total</div>
+                <div id="stat-revenus" class="stat-value-medium">0.00 €</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="stat-group stat-group-bordered-epargne">
+            <div class="stat-group-content stat-group-centered">
+              <div class="stat-mini">
+                <div class="stat-label-tiny">Solde LDDS</div>
+                <div id="solde-ldds" class="stat-value-medium">0.00 €</div>
+              </div>
+              <div class="stat-mini">
+                <div class="stat-label-tiny">Solde Livret A</div>
+                <div id="solde-livret-a" class="stat-value-medium">0.00 €</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="dashboard-tables-grid">
+          <div class="card-white">
+            <div class="header-recap-bg">
+              <h3 class="title-white-semibold">Récapitulatif Mensuel</h3>
+            </div>
+            <table class="table-full">
+              <thead class="thead-revenus-border">
+                <tr>
+                  <th class="th-left-upper">Catégorie</th>
+                  <th class="th-right-upper">Réel</th>
+                  <th class="th-right-upper">Prévu</th>
+                  <th class="th-right-upper">Écart</th>
+                </tr>
+              </thead>
+              <tbody id="stats-table-body" class="tbody-white-divide"></tbody>
+            </table>
+          </div>
+
+          <div class="card-white border-gray">
+            <div class="header-epargne-bg">
+              <h3 class="title-white-semibold">Epargne</h3>
+            </div>
+            <table class="table-full">
+              <tbody id="epargne-table-body" class="tbody-white-divide"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="transactions-tab" class="tab-content">
+        <div class="transactions-header-gradient">
+          <h2 class="transactions-title">Transactions <span id="trans-year">2025</span></h2>
+          
+          <div class="search-container">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="text" id="search-transactions" class="search-input" placeholder="Rechercher...">
+          </div>
+          
+          <button id="new-transaction-btn" class="btn-primary-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Nouvelle Transaction
+          </button>
+          
+          <select id="filter-month" class="filter-select">
+            <option value="all">Tous les mois</option>
+            <option value="0">Janvier</option><option value="1">Février</option><option value="2">Mars</option><option value="3">Avril</option><option value="4">Mai</option><option value="5">Juin</option><option value="6">Juillet</option><option value="7">Août</option><option value="8">Septembre</option><option value="9">Octobre</option><option value="10">Novembre</option><option value="11">Décembre</option>
+          </select>
+          
+          <select id="filter-type" class="filter-select">
+            <option value="all">Tous les types</option>
+            <option value="Revenus">Revenus</option>
+            <option value="Charges_fixes">Charges Fixes</option>
+            <option value="Essentiel">Essentiel</option>
+            <option value="Extras">Extras</option>
+            <option value="Epargne">Epargne</option>
+          </select>
+          
+          <select id="filter-category" class="filter-select">
+            <option value="all">Toutes les catégories</option>
+          </select>
+        </div>
+        
+        <div class="card-white p-0">
+          <table class="table-full transactions-table">
+            <thead>
+              <tr>
+                <th class="th-sortable th-left-upper" data-sort="date">Date <span class="sort-indicator"></span></th>
+                <th class="th-sortable" data-sort="type">Type <span class="sort-indicator"></span></th>
+                <th class="th-sortable" data-sort="category">Catégorie <span class="sort-indicator"></span></th>
+                <th class="th-sortable th-right-upper" data-sort="amount">Montant <span class="sort-indicator"></span></th>
+                <th>Commentaire</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="transactions-table-body" class="tbody-white-divide"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="budget-tab" class="tab-content">
+        <div id="budget-tables-container" class="budget-tables-container"></div>
+      </div>
+
+      <div id="statistics-tab" class="tab-content">
+        <div class="statistics-header-gradient">
+          <h2 class="statistics-title">Statistiques Comparatives</h2>
+          <div class="year-comparison-selector">
+            <select id="compare-year-1" class="filter-select">
+              <option value="2024">2024</option>
+              <option value="2025" selected>2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+            </select>
+            <span style="color: white; margin: 0 0.5rem; font-weight: 600;">vs</span>
+            <select id="compare-year-2" class="filter-select">
+              <option value="2024" selected>2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="statistics-charts-grid">
+          <div class="card-white">
+            <h3 class="card-title-stats">Revenus vs Dépenses</h3>
+            <canvas id="chart-comparison-bars" height="100"></canvas>
+          </div>
+          <div class="card-white">
+            <h3 class="card-title-stats">Évolution par Type</h3>
+            <canvas id="chart-comparison-line" height="100"></canvas>
+          </div>
+        </div>
+
+        <div class="card-white">
+          <div class="header-stats-bg">
+            <h3 class="title-white-semibold">Comparatif Détaillé</h3>
+          </div>
+          <table class="table-full">
+            <thead>
+              <tr>
+                <th class="th-left-upper">Catégorie</th>
+                <th class="th-right-upper" id="year1-header">2025</th>
+                <th class="th-right-upper" id="year2-header">2024</th>
+                <th class="th-right-upper">Évolution (€)</th>
+                <th class="th-right-upper">Évolution (%)</th>
+              </tr>
+            </thead>
+            <tbody id="comparison-table-body" class="tbody-white-divide"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="settings-tab" class="tab-content">
+        <div class="settings-header-gradient">
+          <h2 class="settings-title">Paramètres & Catégories</h2>
+          <p style="color: rgba(255,255,255,0.9); font-size: 0.9rem; margin-top: 0.5rem;">Personnalisez les catégories de votre budget</p>
+        </div>
+
+        <div class="settings-grid">
+          <div class="card-white bordered-revenus">
+            <div class="header-revenus-bg">
+              <h3 class="title-white-semibold">REVENUS</h3>
+            </div>
+            <div class="categories-list" id="categories-list-Revenus"></div>
+            <button class="btn-add-category" data-type="Revenus">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Ajouter une catégorie
+            </button>
+          </div>
+
+          <div class="card-white bordered-depenses">
+            <div class="header-depenses-bg">
+              <h3 class="title-white-semibold">CHARGES FIXES</h3>
+            </div>
+            <div class="categories-list" id="categories-list-Charges_fixes"></div>
+            <button class="btn-add-category" data-type="Charges_fixes">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Ajouter une catégorie
+            </button>
+          </div>
+
+          <div class="card-white bordered-depenses">
+            <div class="header-depenses-bg">
+              <h3 class="title-white-semibold">ESSENTIEL</h3>
+            </div>
+            <div class="categories-list" id="categories-list-Essentiel"></div>
+            <button class="btn-add-category" data-type="Essentiel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Ajouter une catégorie
+            </button>
+          </div>
+
+          <div class="card-white bordered-depenses">
+            <div class="header-depenses-bg">
+              <h3 class="title-white-semibold">EXTRAS</h3>
+            </div>
+            <div class="categories-list" id="categories-list-Extras"></div>
+            <button class="btn-add-category" data-type="Extras">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Ajouter une catégorie
+            </button>
+          </div>
+
+          <div class="card-white bordered-epargne">
+            <div class="header-epargne-bg">
+              <h3 class="title-white-semibold">ÉPARGNE</h3>
+            </div>
+            <div class="categories-list" id="categories-list-Epargne"></div>
+            <button class="btn-add-category" data-type="Epargne">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Ajouter une catégorie
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-footer">
+          <button id="reset-categories-btn" class="btn-reset-categories">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            Réinitialiser les catégories par défaut
+          </button>
+        </div>
+      </div>
+      
+      <input type="file" id="import-file-input" accept=".json" style="display: none;">
+    </main>
+  </div>
+  
+  <div id="transaction-form" class="modal-fixed-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="form-title">Nouvelle Transaction</h2>
+        <button id="close-form-btn" class="btn-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="trans-date">Date</label>
+          <input type="date" id="trans-date" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="trans-type">Type</label>
+          <select id="trans-type" class="form-input" required>
+            <option value="Revenus">Revenus</option>
+            <option value="Charges_fixes">Charges Fixes</option>
+            <option value="Essentiel">Essentiel</option>
+            <option value="Extras">Extras</option>
+            <option value="Epargne">Epargne</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="trans-category">Catégorie</label>
+          <select id="trans-category" class="form-input" required></select>
+        </div>
+        <div class="form-group">
+          <label for="trans-amount">Montant (€)</label>
+          <input type="number" id="trans-amount" class="form-input" step="0.01" placeholder="0.00" required>
+        </div>
+        <div class="form-group">
+          <label for="trans-comment">Commentaire</label>
+          <input type="text" id="trans-comment" class="form-input" placeholder="Optionnel">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="save-transaction-btn" class="btn-primary">Enregistrer</button>
+        <button id="save-and-new-transaction-btn" class="btn-primary-outline">+ Transaction</button>
+        <button id="cancel-transaction-btn" class="btn-secondary">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="firebase-sync.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => {
+            console.log('Service Worker enregistré');
+            reg.update();
+          })
+          .catch(err => console.log('Erreur Service Worker:', err));
+      });
+    }
+  </script>
+</body>
+</html>

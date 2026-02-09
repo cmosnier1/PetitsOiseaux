@@ -1,0 +1,15 @@
+{
+  "name": "Aux Petits des Oiseaux",
+  "short_name": "Oiseaux",
+  "description": "Gestionnaire budgétaire personnel pour suivre revenus, dépenses et épargne",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F9FAFB",
+  "theme_color": "#4EA09C",
+  "orientation": "any",
+  "scope": "./",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
