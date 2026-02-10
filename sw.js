@@ -1,4 +1,4 @@
-const CACHE_NAME = 'budget-cache-v8.0';
+const CACHE_NAME = 'budget-cache-v9.0';
 const urlsToCache = [
   './',
   './index.html',
@@ -22,10 +22,13 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Ignorer les requêtes chrome-extension://, moz-extension://, safari-extension://
+  // Ignorer les requêtes d'extensions et les requêtes Firebase
   if (event.request.url.startsWith('chrome-extension://') || 
       event.request.url.startsWith('moz-extension://') ||
-      event.request.url.startsWith('safari-extension://')) {
+      event.request.url.startsWith('safari-extension://') ||
+      event.request.url.includes('firebaseio.com') ||
+      event.request.url.includes('googleapis.com') ||
+      event.request.url.includes('gstatic.com')) {
     return;
   }
   
@@ -37,8 +40,6 @@ self.addEventListener('fetch', (event) => {
         }
         return fetch(event.request).then(
           (response) => {
-            // Ne pas cacher si la réponse n'est pas valide
-            // CORRECTION: Permettre aussi les requêtes CORS (type: 'cors')
             if (!response || response.status !== 200 || 
                 (response.type !== 'basic' && response.type !== 'cors')) {
               return response;
@@ -47,7 +48,6 @@ self.addEventListener('fetch', (event) => {
             const responseToCache = response.clone();
             caches.open(CACHE_NAME)
               .then((cache) => {
-                // Vérifier que l'URL est cachable
                 try {
                   cache.put(event.request, responseToCache);
                 } catch (error) {
