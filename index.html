@@ -6,11 +6,14 @@
   <meta name="description" content="Gestionnaire budgétaire personnel">
   <meta name="theme-color" content="#4EA09C">
   <title>Aux Petits des Oiseaux</title>
-  <link rel="stylesheet" href="style.css?v=70">
+  <link rel="stylesheet" href="style.css?v=71">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
 <body>
   <div id="app" class="min-h-screen bg-gray-100" style="display:block;">
@@ -98,6 +101,13 @@
               <path d="M21 12h-6m-6 0H3"></path>
             </svg>
             Config
+          </button>
+          <button id="sync-auth-btn" class="btn-sync-navbar">
+            <span class="sync-dot sync-offline" id="sync-indicator"></span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+            Sync
           </button>
         </div>
       </div>
@@ -472,10 +482,11 @@
   </div>
 
   <script src="app.js"></script>
+  <script src="firebase-sync.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('./sw.js')
           .then(reg => {
             console.log('Service Worker enregistré');
             reg.update();
