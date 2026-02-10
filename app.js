@@ -1008,7 +1008,7 @@ function calculateStatsForMonth(month) {
     chargesReel: 0,
     essentielReel: 0,
     extrasReel: 0,
-    epargnePositive: 0
+    epargneNette: 0
   };
   
   state.transactions
@@ -1021,7 +1021,7 @@ function calculateStatsForMonth(month) {
       if (t.type === 'Charges_fixes') stats.chargesReel += t.amount;
       if (t.type === 'Essentiel') stats.essentielReel += t.amount;
       if (t.type === 'Extras') stats.extrasReel += t.amount;
-      if (t.type === 'Epargne' && t.amount > 0) stats.epargnePositive += t.amount;
+      if (t.type === 'Epargne') stats.epargneNette += t.amount;
     });
   
   return stats;
@@ -1135,23 +1135,22 @@ function updateDashboard() {
     depensesSubtitle.textContent = `Fixes restant: ${formatCurrency(fixesRestant)} €`;
   }
   
-  const epargnePositiveMensuelle = state.transactions
+  const epargneNetteMensuelle = state.transactions
     .filter(t => {
       const d = new Date(t.date);
       return d.getFullYear() === state.currentYear && 
              d.getMonth() === state.currentMonth &&
-             t.type === 'Epargne' && 
-             t.amount > 0;
+             t.type === 'Epargne';
     })
     .reduce((sum, t) => sum + t.amount, 0);
   
-  const soldeDisponible = revenusReelMensuel - chargesPrevuMensuel - essentielReelMensuel - extrasReelMensuel - epargnePositiveMensuelle;
+  const soldeDisponible = revenusReelMensuel - chargesPrevuMensuel - essentielReelMensuel - extrasReelMensuel - epargneNetteMensuelle;
   
   const soldeDispEl = document.getElementById('stat-disponible');
   soldeDispEl.textContent = `${formatCurrency(soldeDisponible)} €`;
   soldeDispEl.style.color = soldeDisponible >= 0 ? '#000000' : '#CC0066';
   
-  const soldeCCP = revenusReelMensuel - chargesReelMensuel - essentielReelMensuel - extrasReelMensuel - epargnePositiveMensuelle;
+  const soldeCCP = revenusReelMensuel - chargesReelMensuel - essentielReelMensuel - extrasReelMensuel - epargneNetteMensuelle;
   
   const epargneAnnuelReel = calculateAnnualEpargneReel();
   
@@ -1223,7 +1222,7 @@ function renderSparklineCCP() {
                      Math.abs(stats.chargesReel) - 
                      Math.abs(stats.essentielReel) - 
                      Math.abs(stats.extrasReel) - 
-                     stats.epargnePositive;
+                     stats.epargneNette;
     soldeCCPData.push(soldeCCP);
   }
   
