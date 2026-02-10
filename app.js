@@ -68,6 +68,8 @@ function initApp() {
   setupEventListeners();
   loadUserData();
   updateDisplay();
+  // Initialiser Firebase (la sync démarre après connexion Google)
+  if (typeof initFirebase === 'function') initFirebase();
 }
 
 // ============================================
@@ -92,6 +94,8 @@ function loadCategories() {
 function saveCategories() {
   localStorage.setItem('customCategories', JSON.stringify(CATEGORIES));
   console.log('✅ Catégories sauvegardées');
+  // Synchroniser avec Firebase si connecté
+  if (typeof pushToFirebase === 'function') pushToFirebase();
 }
 
 function resetCategories() {
@@ -887,10 +891,14 @@ function initializeBudgetsForYear(year) {
 
 function saveTransactions() {
   localStorage.setItem('transactions', JSON.stringify(state.transactions));
+  // Synchroniser avec Firebase si connecté
+  if (typeof pushToFirebase === 'function') pushToFirebase();
 }
 
 function saveBudgets() {
   localStorage.setItem('budgets', JSON.stringify(state.budgets));
+  // Synchroniser avec Firebase si connecté
+  if (typeof pushToFirebase === 'function') pushToFirebase();
 }
 
 function updateDisplay() {
