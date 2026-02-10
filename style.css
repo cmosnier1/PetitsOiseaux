@@ -3511,6 +3511,185 @@ html {
 }
 
 /* ============================================
+   MOBILE PLEINE LARGEUR — Tout caler bord à bord
+   ============================================ */
+
+@media (max-width: 768px) {
+
+  /* --- CONTENEUR PRINCIPAL --- */
+  .main-content {
+    padding: 0.75rem 0.4rem !important;
+  }
+
+  /* --- TOUTES LES CARTES : pleine largeur, coins arrondis légers --- */
+  .card-white,
+  .stat-group,
+  .stat-card-group,
+  .stat-card-revenus,
+  .stat-card-depenses,
+  .stat-card-disponible {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 8px !important;
+  }
+
+  /* --- DASHBOARD : cartes et tableaux pleine largeur --- */
+  .stats-grid-dashboard-grouped {
+    width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .dashboard-tables-grid {
+    width: 100% !important;
+  }
+
+  .dashboard-tables-grid .card-white {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* --- TRANSACTIONS : barre header en colonnes --- */
+  .transactions-header-gradient {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+    padding: 1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .transactions-header-gradient .transactions-title {
+    text-align: center !important;
+    font-size: 1.2rem !important;
+  }
+
+  .transactions-header-gradient .search-container {
+    width: 100% !important;
+  }
+
+  .transactions-header-gradient .search-input {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .transactions-header-gradient .search-input:focus {
+    width: 100% !important;
+  }
+
+  .transactions-header-gradient .btn-primary-icon {
+    width: 100% !important;
+    margin-left: 0 !important;
+    justify-content: center !important;
+  }
+
+  .transactions-header-gradient .filter-select {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* --- TRANSACTIONS : tableau pleine largeur --- */
+  #transactions-tab .card-white {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 0 !important;
+  }
+
+  #transactions-tab .table-full,
+  #transactions-tab .transactions-table {
+    width: 100% !important;
+    min-width: 500px !important;
+  }
+
+  /* --- BUDGET : tableaux pleine largeur --- */
+  .budget-tables-container {
+    width: 100% !important;
+  }
+
+  .budget-table-wrapper {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .budget-table-wrapper .card-white {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* --- STATS : cartes et graphiques pleine largeur --- */
+  .statistics-header-gradient {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    padding: 1rem !important;
+  }
+
+  .statistics-title {
+    text-align: center !important;
+    font-size: 1.3rem !important;
+  }
+
+  .stats-mode-toggle {
+    justify-content: center !important;
+  }
+
+  .year-comparison-selector {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 0.5rem !important;
+    align-items: center !important;
+  }
+
+  .year-comparison-selector .filter-select,
+  .year-comparison-selector select {
+    width: 100% !important;
+  }
+
+  .statistics-charts-grid {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+
+  .statistics-charts-grid .card-white {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Tableau comparatif stats */
+  #statistics-tab > .card-white {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* --- CONFIG : cartes pleine largeur --- */
+  .settings-grid {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+
+  .settings-grid .card-white {
+    width: 100% !important;
+  }
+
+  .settings-header-gradient {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border-radius: 8px 8px 0 0 !important;
+  }
+
+  /* --- TABLEAUX : scroll horizontal fluide --- */
+  .table-full {
+    display: table !important;
+  }
+}
+
+/* ============================================
    BOUTON SYNC FIREBASE
    ============================================ */
 
