@@ -1,11 +1,10 @@
 // ============================================
 // 🔄 FIREBASE-SYNC.JS — Synchronisation temps réel
-// Version 1.0 — Aux Petits des Oiseaux
+// Version 1.1 — Aux Petits des Oiseaux
 // ============================================
 
-// ⚠️ REMPLACE CES VALEURS par celles de ton projet Firebase (voir guide)
 const FIREBASE_CONFIG = {
-   apiKey: "AIzaSyANl-hEncz22PVXEk6dHoBdtqLf9S0Ecr0",
+  apiKey: "AIzaSyANl-hEncz22PVXEk6dHoBdtqLf9S0Ecr0",
   authDomain: "auxpetitsdesoiseaux-610fe.firebaseapp.com",
   databaseURL: "https://auxpetitsdesoiseaux-610fe-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "auxpetitsdesoiseaux-610fe",
@@ -31,17 +30,9 @@ let syncDebounceTimer = null;
 // ============================================
 
 function initFirebase() {
-  // Vérifier que le SDK Firebase est chargé
   if (typeof firebase === 'undefined') {
     console.warn('⚠️ SDK Firebase non chargé — mode local uniquement');
     updateSyncStatus('offline', 'Mode local');
-    return;
-  }
-
-  // Vérifier que la config a été remplie
-  if (FIREBASE_CONFIG.apiKey === 'COLLE_ICI_TA_API_KEY') {
-    console.warn('⚠️ Configuration Firebase non remplie — mode local uniquement');
-    updateSyncStatus('offline', 'Non configuré');
     return;
   }
 
@@ -50,10 +41,6 @@ function initFirebase() {
     firebaseAuth = firebase.auth();
     firebaseDb = firebase.database();
 
-    // Persistence hors-ligne pour la base de données
-    firebaseDb.goOnline();
-
-    // Écouter les changements d'état de connexion
     firebaseAuth.onAuthStateChanged(handleAuthStateChanged);
 
     console.log('✅ Firebase initialisé');
@@ -129,7 +116,6 @@ function startFirebaseSync() {
 
   const userRef = firebaseDb.ref('users/' + currentFirebaseUser.uid);
 
-  // 1. Charger les données Firebase une première fois
   userRef.once('value').then(snapshot => {
     if (snapshot.exists()) {
       const data = snapshot.val();
@@ -137,11 +123,9 @@ function startFirebaseSync() {
       const remoteTimestamp = data.lastModified || 0;
 
       if (remoteTimestamp > localTimestamp) {
-        // Firebase est plus récent → charger depuis Firebase
         console.log('🔄 Chargement depuis Firebase (plus récent)');
         applyFirebaseData(data);
       } else if (localTimestamp > remoteTimestamp) {
-        // Local est plus récent → pousser vers Firebase
         console.log('🔄 Envoi vers Firebase (local plus récent)');
         pushToFirebase();
       } else {
@@ -149,12 +133,10 @@ function startFirebaseSync() {
         updateSyncStatus('synced', 'Synchronisé');
       }
     } else {
-      // Firebase est vide → pousser les données locales
       console.log('📤 Première synchronisation — envoi des données locales');
       pushToFirebase();
     }
 
-    // 2. Écouter les changements en temps réel
     listenToFirebase();
 
   }).catch(error => {
@@ -190,7 +172,6 @@ function applyFirebaseData(data) {
       localStorage.setItem('lastModified', data.lastModified.toString());
     }
 
-    // Mettre à jour l'affichage
     updateDisplay();
     updateSyncStatus('synced', 'Synchronisé');
 
@@ -207,11 +188,9 @@ function listenToFirebase() {
 
   const userRef = firebaseDb.ref('users/' + currentFirebaseUser.uid);
 
-  // Ignorer le premier événement (on l'a déjà traité dans startFirebaseSync)
   let isFirstEvent = true;
 
   firebaseListener = userRef.on('value', (snapshot) => {
-    // Ignorer si c'est nous qui avons écrit, ou le premier chargement
     if (isSyncingFromFirebase || isFirstEvent) {
       isFirstEvent = false;
       return;
@@ -220,7 +199,6 @@ function listenToFirebase() {
     const data = snapshot.val();
     if (!data || !data.lastModified) return;
 
-    // Vérifier si les données distantes sont plus récentes
     const localTimestamp = parseInt(localStorage.getItem('lastModified') || '0');
     if (data.lastModified <= localTimestamp) return;
 
@@ -240,15 +218,9 @@ function stopFirebaseSync() {
   }
 }
 
-/**
- * Envoie les données vers Firebase.
- * Appelée automatiquement par saveTransactions(), saveBudgets(), saveCategories()
- * Utilise un debounce de 500ms pour éviter les écritures multiples rapides
- */
 function pushToFirebase() {
   if (!currentFirebaseUser || isSyncingFromFirebase) return;
 
-  // Debounce : regrouper les écritures rapides
   if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
 
   updateSyncStatus('syncing', 'Envoi...');
@@ -257,7 +229,6 @@ function pushToFirebase() {
     const timestamp = Date.now();
     const userRef = firebaseDb.ref('users/' + currentFirebaseUser.uid);
 
-    // Préparer les données (nettoyer les undefined que Firebase n'accepte pas)
     const cleanData = {
       transactions: state.transactions || [],
       budgets: state.budgets || {},
@@ -274,7 +245,6 @@ function pushToFirebase() {
     }).catch(error => {
       console.error('❌ Erreur envoi Firebase:', error);
       updateSyncStatus('error', 'Erreur envoi');
-      // Les données sont toujours en localStorage, rien n'est perdu
     });
   }, 500);
 }
@@ -285,7 +255,6 @@ function pushToFirebase() {
 
 function updateAuthUI(isLoggedIn, user) {
   const authBtn = document.getElementById('sync-auth-btn');
-  const syncDot = document.getElementById('sync-indicator');
   if (!authBtn) return;
 
   if (isLoggedIn && user) {
@@ -321,7 +290,6 @@ function updateSyncStatus(status, text) {
   const indicator = document.getElementById('sync-indicator');
   if (!indicator) return;
 
-  // Nettoyer les anciennes classes
   indicator.classList.remove('sync-synced', 'sync-syncing', 'sync-error', 'sync-offline');
   indicator.classList.add('sync-' + status);
   indicator.title = text;
