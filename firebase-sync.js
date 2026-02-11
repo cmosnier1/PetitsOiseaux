@@ -218,6 +218,36 @@ function stopFirebaseSync() {
   }
 }
 
+/**
+ * Nettoie récursivement les données pour Firebase :
+ * - Remplace undefined par null
+ * - Convertit les tableaux creux (sparse arrays) en tableaux denses
+ * - Supprime les clés avec valeur undefined dans les objets
+ */
+function deepCleanForFirebase(data) {
+  if (data === undefined) return null;
+  if (data === null || typeof data !== 'object') return data;
+
+  if (Array.isArray(data)) {
+    // Convertir en tableau dense : chaque index doit avoir une valeur
+    const cleaned = [];
+    for (let i = 0; i < data.length; i++) {
+      cleaned[i] = deepCleanForFirebase(data[i] !== undefined ? data[i] : null);
+    }
+    return cleaned;
+  }
+
+  // Objet : nettoyer chaque propriété
+  const cleaned = {};
+  for (const key of Object.keys(data)) {
+    const val = data[key];
+    if (val !== undefined) {
+      cleaned[key] = deepCleanForFirebase(val);
+    }
+  }
+  return cleaned;
+}
+
 function pushToFirebase() {
   if (!currentFirebaseUser || isSyncingFromFirebase) return;
 
@@ -229,14 +259,17 @@ function pushToFirebase() {
     const timestamp = Date.now();
     const userRef = firebaseDb.ref('users/' + currentFirebaseUser.uid);
 
-    const cleanData = {
+    // Nettoyage profond pour éliminer les undefined que Firebase refuse
+    const cleanData = deepCleanForFirebase({
       transactions: state.transactions || [],
       budgets: state.budgets || {},
       categories: CATEGORIES || {},
       epargneBase: state.epargneBase || {},
       lastModified: timestamp,
       lastDevice: navigator.userAgent.substring(0, 100)
-    };
+    });
+
+    console.log('📤 Envoi vers Firebase...', Object.keys(cleanData));
 
     userRef.set(cleanData).then(() => {
       localStorage.setItem('lastModified', timestamp.toString());
