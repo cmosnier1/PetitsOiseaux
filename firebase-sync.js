@@ -114,6 +114,25 @@ function startFirebaseSync() {
 
   updateSyncStatus('syncing', 'Synchronisation...');
 
+  // Attendre que le token d'auth soit valide côté serveur
+  currentFirebaseUser.getIdToken(true).then(() => {
+    console.log('🔑 Token auth obtenu, démarrage sync...');
+    doFirebaseSync();
+  }).catch(error => {
+    console.error('❌ Erreur token auth:', error);
+    // Réessayer après 2 secondes
+    setTimeout(() => {
+      if (currentFirebaseUser) {
+        console.log('🔄 Nouvelle tentative de sync...');
+        doFirebaseSync();
+      }
+    }, 2000);
+  });
+}
+
+function doFirebaseSync() {
+  if (!currentFirebaseUser) return;
+
   const userRef = firebaseDb.ref('users/' + currentFirebaseUser.uid);
 
   userRef.once('value').then(snapshot => {
@@ -141,6 +160,7 @@ function startFirebaseSync() {
 
   }).catch(error => {
     console.error('❌ Erreur lecture Firebase:', error);
+    console.error('Code:', error.code, 'Message:', error.message);
     updateSyncStatus('error', 'Erreur lecture');
   });
 }
@@ -256,28 +276,34 @@ function pushToFirebase() {
   updateSyncStatus('syncing', 'Envoi...');
 
   syncDebounceTimer = setTimeout(() => {
-    const timestamp = Date.now();
-    const userRef = firebaseDb.ref('users/' + currentFirebaseUser.uid);
+    // S'assurer que le token est à jour avant d'écrire
+    currentFirebaseUser.getIdToken().then(() => {
+      const timestamp = Date.now();
+      const userRef = firebaseDb.ref('users/' + currentFirebaseUser.uid);
 
-    // Nettoyage profond pour éliminer les undefined que Firebase refuse
-    const cleanData = deepCleanForFirebase({
-      transactions: state.transactions || [],
-      budgets: state.budgets || {},
-      categories: CATEGORIES || {},
-      epargneBase: state.epargneBase || {},
-      lastModified: timestamp,
-      lastDevice: navigator.userAgent.substring(0, 100)
-    });
+      // Nettoyage profond pour éliminer les undefined que Firebase refuse
+      const cleanData = deepCleanForFirebase({
+        transactions: state.transactions || [],
+        budgets: state.budgets || {},
+        categories: CATEGORIES || {},
+        epargneBase: state.epargneBase || {},
+        lastModified: timestamp,
+        lastDevice: navigator.userAgent.substring(0, 100)
+      });
 
-    console.log('📤 Envoi vers Firebase...', Object.keys(cleanData));
+      console.log('📤 Envoi vers Firebase...', Object.keys(cleanData));
 
-    userRef.set(cleanData).then(() => {
-      localStorage.setItem('lastModified', timestamp.toString());
-      updateSyncStatus('synced', 'Synchronisé');
-      console.log('✅ Données envoyées vers Firebase');
+      userRef.set(cleanData).then(() => {
+        localStorage.setItem('lastModified', timestamp.toString());
+        updateSyncStatus('synced', 'Synchronisé');
+        console.log('✅ Données envoyées vers Firebase');
+      }).catch(error => {
+        console.error('❌ Erreur envoi Firebase:', error.code, error.message);
+        updateSyncStatus('error', 'Erreur envoi');
+      });
     }).catch(error => {
-      console.error('❌ Erreur envoi Firebase:', error);
-      updateSyncStatus('error', 'Erreur envoi');
+      console.error('❌ Erreur token pour écriture:', error);
+      updateSyncStatus('error', 'Erreur auth');
     });
   }, 500);
 }
