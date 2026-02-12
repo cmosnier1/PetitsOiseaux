@@ -6,7 +6,7 @@
   <meta name="description" content="Gestionnaire budgétaire personnel">
   <meta name="theme-color" content="#4EA09C">
   <title>Aux Petits des Oiseaux</title>
-  <link rel="stylesheet" href="style.css?v=75">
+  <link rel="stylesheet" href="style.css?v=76">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -186,7 +186,8 @@
         </div>
         
         <div class="dashboard-tables-grid">
-          <div class="card-white">
+          <div class="card-white dashboard-table-scroll">
+            <div class="dashboard-table-inner">
             <div class="header-recap-bg">
               <h3 class="title-white-semibold">Récapitulatif Mensuel</h3>
             </div>
@@ -201,15 +202,18 @@
               </thead>
               <tbody id="stats-table-body" class="tbody-white-divide"></tbody>
             </table>
+            </div>
           </div>
 
-          <div class="card-white border-gray">
+          <div class="card-white border-gray dashboard-table-scroll">
+            <div class="dashboard-table-inner">
             <div class="header-epargne-bg">
               <h3 class="title-white-semibold">Epargne</h3>
             </div>
             <table class="table-full">
               <tbody id="epargne-table-body" class="tbody-white-divide"></tbody>
             </table>
+            </div>
           </div>
         </div>
       </div>
@@ -235,12 +239,12 @@
           </button>
           
           <select id="filter-month" class="filter-select">
-            <option value="all">Tous les mois</option>
+            <option value="all">Mois ▾</option>
             <option value="0">Janvier</option><option value="1">Février</option><option value="2">Mars</option><option value="3">Avril</option><option value="4">Mai</option><option value="5">Juin</option><option value="6">Juillet</option><option value="7">Août</option><option value="8">Septembre</option><option value="9">Octobre</option><option value="10">Novembre</option><option value="11">Décembre</option>
           </select>
           
           <select id="filter-type" class="filter-select">
-            <option value="all">Tous les types</option>
+            <option value="all">Types ▾</option>
             <option value="Revenus">Revenus</option>
             <option value="Charges_fixes">Charges Fixes</option>
             <option value="Essentiel">Essentiel</option>
@@ -249,7 +253,7 @@
           </select>
           
           <select id="filter-category" class="filter-select">
-            <option value="all">Toutes les catégories</option>
+            <option value="all">Catégories ▾</option>
           </select>
         </div>
         
@@ -325,7 +329,8 @@
           </div>
         </div>
 
-        <div class="card-white">
+        <div class="card-white stats-table-scroll">
+          <div class="stats-table-inner">
           <div class="header-stats-bg">
             <h3 class="title-white-semibold">Comparatif Détaillé</h3>
           </div>
@@ -341,6 +346,7 @@
             </thead>
             <tbody id="comparison-table-body" class="tbody-white-divide"></tbody>
           </table>
+          </div>
         </div>
       </div>
 
