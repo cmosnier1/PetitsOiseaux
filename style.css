@@ -2632,15 +2632,16 @@ html {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Headers cartes uniformisés - MÊME HAUTEUR */
+/* Headers cartes uniformisés */
 .header-recap-bg,
 .header-epargne-bg {
   padding: 0.75rem 1.5rem !important;
   min-height: 48px !important;
-  height: 48px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
 }
 
 .header-epargne-bg {
@@ -3121,19 +3122,6 @@ html {
    ============================================ */
 
 @media (max-width: 768px) {
-  /* Wrapper pour scroll horizontal */
-  .table-full {
-    display: block !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    white-space: nowrap !important;
-  }
-  
-  /* Assurer que le tableau prend toute la largeur minimum */
-  .table-full table {
-    min-width: 100% !important;
-  }
-  
   /* Cellules plus compactes */
   .table-full td,
   .table-full th {
@@ -3141,12 +3129,14 @@ html {
     font-size: 0.85rem !important;
   }
   
-  /* Headers fixes si possible */
+  /* Headers lisibles : texte sombre sur fond blanc */
   .table-full thead {
-    position: sticky !important;
-    top: 0 !important;
     background: white !important;
-    z-index: 10 !important;
+  }
+  
+  .table-full thead th {
+    color: #4b5563 !important;
+    background: white !important;
   }
 }
 
@@ -3521,7 +3511,7 @@ html {
     padding: 0.75rem 0.4rem !important;
   }
 
-  /* --- TOUTES LES CARTES : pleine largeur, coins arrondis légers --- */
+  /* --- TOUTES LES CARTES : pleine largeur --- */
   .card-white,
   .stat-group,
   .stat-card-group,
@@ -3547,9 +3537,35 @@ html {
   .dashboard-tables-grid .card-white {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
+    padding: 0 !important;
   }
 
-  /* --- TRANSACTIONS : barre header en colonnes --- */
+  /* Dashboard : en-têtes recap et épargne pleine largeur */
+  .dashboard-tables-grid .header-recap-bg,
+  .dashboard-tables-grid .header-epargne-bg {
+    margin: 0 !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 0.75rem 1rem !important;
+  }
+
+  /* Dashboard : tableaux ne débordent plus */
+  .dashboard-tables-grid .table-full {
+    display: table !important;
+    width: 100% !important;
+    min-width: 350px !important;
+  }
+
+  /* --- TOUS LES TABLEAUX : en-têtes toujours lisibles --- */
+  .table-full thead {
+    background: white !important;
+  }
+
+  .table-full th {
+    color: var(--color-gray-600, #4b5563) !important;
+    background: white !important;
+  }
+
+  /* --- TRANSACTIONS : barre header --- */
   .transactions-header-gradient {
     flex-direction: column !important;
     align-items: stretch !important;
@@ -3569,13 +3585,10 @@ html {
     width: 100% !important;
   }
 
-  .transactions-header-gradient .search-input {
-    width: 100% !important;
-    min-width: 0 !important;
-  }
-
+  .transactions-header-gradient .search-input,
   .transactions-header-gradient .search-input:focus {
     width: 100% !important;
+    min-width: 0 !important;
   }
 
   .transactions-header-gradient .btn-primary-icon {
@@ -3584,9 +3597,23 @@ html {
     justify-content: center !important;
   }
 
+  /* 3 sélecteurs sur UNE ligne */
   .transactions-header-gradient .filter-select {
-    width: 100% !important;
     min-width: 0 !important;
+    flex: 1 1 0 !important;
+    font-size: 0.75rem !important;
+    padding: 0.5rem 0.4rem !important;
+  }
+
+  /* Wrapper implicite : les 3 selects se mettent en row */
+  .transactions-header-gradient {
+    flex-wrap: wrap !important;
+  }
+
+  .transactions-header-gradient .transactions-title,
+  .transactions-header-gradient .search-container,
+  .transactions-header-gradient .btn-primary-icon {
+    flex: 0 0 100% !important;
   }
 
   /* --- TRANSACTIONS : tableau pleine largeur --- */
@@ -3603,7 +3630,40 @@ html {
     min-width: 500px !important;
   }
 
-  /* --- BUDGET : tableaux pleine largeur --- */
+  /* --- BUDGET : en-têtes sur 2 lignes avec liens + bouton --- */
+  .budget-table-wrapper .header-revenus-bg,
+  .budget-table-wrapper .header-depenses-bg,
+  .budget-table-wrapper .header-epargne-bg {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    min-height: auto !important;
+    padding: 0.75rem 1rem !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Titre sur toute la largeur (1ère ligne) */
+  .budget-table-wrapper .header-revenus-bg h3,
+  .budget-table-wrapper .header-depenses-bg h3,
+  .budget-table-wrapper .header-epargne-bg h3 {
+    flex: 0 0 100% !important;
+    font-size: 1rem !important;
+  }
+
+  /* Liens nav + bouton copier sur la 2ème ligne */
+  .budget-table-wrapper .table-nav-links {
+    flex: 1 !important;
+    margin-left: 0 !important;
+  }
+
+  .budget-table-wrapper .btn-copy-budget {
+    font-size: 0.7rem !important;
+    padding: 0.3rem 0.5rem !important;
+    opacity: 0.7 !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+
+  /* Tableaux budget pleine largeur */
   .budget-tables-container {
     width: 100% !important;
   }
@@ -3614,12 +3674,7 @@ html {
     -webkit-overflow-scrolling: touch !important;
   }
 
-  .budget-table-wrapper .card-white {
-    width: 100% !important;
-    min-width: 0 !important;
-  }
-
-  /* --- STATS : cartes et graphiques pleine largeur --- */
+  /* --- STATS : bandeau pleine largeur --- */
   .statistics-header-gradient {
     width: 100% !important;
     box-sizing: border-box !important;
@@ -3639,17 +3694,21 @@ html {
   }
 
   .year-comparison-selector {
-    flex-direction: column !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
     width: 100% !important;
     gap: 0.5rem !important;
     align-items: center !important;
+    justify-content: center !important;
   }
 
   .year-comparison-selector .filter-select,
   .year-comparison-selector select {
-    width: 100% !important;
+    flex: 1 1 40% !important;
+    min-width: 0 !important;
   }
 
+  /* Graphiques Stats pleine largeur */
   .statistics-charts-grid {
     grid-template-columns: 1fr !important;
     width: 100% !important;
@@ -3660,11 +3719,21 @@ html {
     min-width: 0 !important;
   }
 
-  /* Tableau comparatif stats */
+  /* Tableau comparatif stats : scroll horizontal */
   #statistics-tab > .card-white {
     width: 100% !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
+    padding: 0 !important;
+  }
+
+  #statistics-tab > .card-white .header-stats-bg {
+    margin: 0 !important;
+    border-radius: 8px 8px 0 0 !important;
+  }
+
+  #statistics-tab > .card-white .table-full {
+    min-width: 400px !important;
   }
 
   /* --- CONFIG : cartes pleine largeur --- */
