@@ -3193,15 +3193,18 @@ html {
   }
   
   .filter-group,
-  .filter-select,
   .search-container {
+    width: 100% !important;
+  }
+  
+  /* filter-select 100% sauf dans transactions-header où ils sont sur une ligne */
+  .filter-select {
     width: 100% !important;
   }
   
   /* Tableau transactions scroll horizontal */
   #transactions-table-body {
-    display: block !important;
-    overflow-x: auto !important;
+    /* display: table-row-group pour garder l'alignement des colonnes */
   }
   
   /* Actions plus compactes */
@@ -3511,6 +3514,30 @@ html {
     padding: 0.75rem 0.4rem !important;
   }
 
+  /* --- RESET GLOBAL : annuler TOUTES les marges négatives des bandeaux --- */
+  .dashboard-header-gradient,
+  .transactions-header-gradient,
+  .statistics-header-gradient,
+  .settings-header-gradient,
+  .header-recap-bg,
+  .header-epargne-bg,
+  .header-stats-bg,
+  .header-revenus-bg,
+  .header-depenses-bg {
+    margin: 0 !important;
+    border-radius: 8px 8px 0 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Ré-ajouter uniquement la marge basse */
+  .dashboard-header-gradient,
+  .transactions-header-gradient,
+  .statistics-header-gradient,
+  .settings-header-gradient {
+    margin-bottom: 1rem !important;
+  }
+
   /* --- TOUTES LES CARTES : pleine largeur --- */
   .card-white,
   .stat-group,
@@ -3524,7 +3551,7 @@ html {
     border-radius: 8px !important;
   }
 
-  /* --- DASHBOARD : cartes et tableaux pleine largeur --- */
+  /* --- DASHBOARD --- */
   .stats-grid-dashboard-grouped {
     width: 100% !important;
     padding: 0 !important;
@@ -3534,55 +3561,48 @@ html {
     width: 100% !important;
   }
 
+  /* Dashboard : cartes tableaux en conteneur scrollable */
   .dashboard-tables-grid .card-white {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
     padding: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
-  /* Dashboard : en-têtes recap et épargne pleine largeur */
-  .dashboard-tables-grid .header-recap-bg,
-  .dashboard-tables-grid .header-epargne-bg {
-    margin: 0 !important;
-    border-radius: 8px 8px 0 0 !important;
-    padding: 0.75rem 1rem !important;
-  }
-
-  /* Dashboard : tableaux ne débordent plus */
+  /* Dashboard : tableaux pleine largeur avec scroll */
   .dashboard-tables-grid .table-full {
     display: table !important;
     width: 100% !important;
     min-width: 350px !important;
+    white-space: normal !important;
   }
 
-  /* --- TOUS LES TABLEAUX : en-têtes toujours lisibles --- */
-  .table-full thead {
-    background: white !important;
-  }
-
-  .table-full th {
-    color: var(--color-gray-600, #4b5563) !important;
+  /* En-têtes de tableaux toujours lisibles (texte sombre) */
+  .dashboard-tables-grid .table-full thead th,
+  #transactions-tab .table-full thead th,
+  #statistics-tab .table-full thead th {
+    color: #4b5563 !important;
     background: white !important;
   }
 
   /* --- TRANSACTIONS : barre header --- */
   .transactions-header-gradient {
-    flex-direction: column !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    flex-direction: row !important;
     align-items: stretch !important;
     gap: 0.5rem !important;
     padding: 1rem !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
     overflow-x: hidden !important;
   }
-
   .transactions-header-gradient .transactions-title {
+    flex: 0 0 100% !important;
     text-align: center !important;
     font-size: 1.2rem !important;
   }
 
   .transactions-header-gradient .search-container {
-    width: 100% !important;
+    flex: 0 0 100% !important;
   }
 
   .transactions-header-gradient .search-input,
@@ -3592,31 +3612,21 @@ html {
   }
 
   .transactions-header-gradient .btn-primary-icon {
-    width: 100% !important;
+    flex: 0 0 100% !important;
     margin-left: 0 !important;
     justify-content: center !important;
   }
 
-  /* 3 sélecteurs sur UNE ligne */
+  /* 3 sélecteurs sur UNE ligne, se partagent l'espace */
   .transactions-header-gradient .filter-select {
+    flex: 1 1 30% !important;
     min-width: 0 !important;
-    flex: 1 1 0 !important;
     font-size: 0.75rem !important;
-    padding: 0.5rem 0.4rem !important;
+    padding: 0.5rem 0.3rem !important;
+    width: auto !important;
   }
 
-  /* Wrapper implicite : les 3 selects se mettent en row */
-  .transactions-header-gradient {
-    flex-wrap: wrap !important;
-  }
-
-  .transactions-header-gradient .transactions-title,
-  .transactions-header-gradient .search-container,
-  .transactions-header-gradient .btn-primary-icon {
-    flex: 0 0 100% !important;
-  }
-
-  /* --- TRANSACTIONS : tableau pleine largeur --- */
+  /* Tableau transactions pleine largeur */
   #transactions-tab .card-white {
     width: 100% !important;
     overflow-x: auto !important;
@@ -3626,22 +3636,26 @@ html {
 
   #transactions-tab .table-full,
   #transactions-tab .transactions-table {
+    display: table !important;
     width: 100% !important;
     min-width: 500px !important;
   }
 
-  /* --- BUDGET : en-têtes sur 2 lignes avec liens + bouton --- */
+  /* Forcer le tbody en mode table-row-group (pas block) */
+  #transactions-tab #transactions-table-body {
+    display: table-row-group !important;
+  }
+
+  /* --- BUDGET : en-têtes sur 2 lignes --- */
   .budget-table-wrapper .header-revenus-bg,
   .budget-table-wrapper .header-depenses-bg,
   .budget-table-wrapper .header-epargne-bg {
     flex-wrap: wrap !important;
     height: auto !important;
     min-height: auto !important;
-    padding: 0.75rem 1rem !important;
     gap: 0.5rem !important;
   }
 
-  /* Titre sur toute la largeur (1ère ligne) */
   .budget-table-wrapper .header-revenus-bg h3,
   .budget-table-wrapper .header-depenses-bg h3,
   .budget-table-wrapper .header-epargne-bg h3 {
@@ -3649,7 +3663,6 @@ html {
     font-size: 1rem !important;
   }
 
-  /* Liens nav + bouton copier sur la 2ème ligne */
   .budget-table-wrapper .table-nav-links {
     flex: 1 !important;
     margin-left: 0 !important;
@@ -3663,7 +3676,6 @@ html {
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
   }
 
-  /* Tableaux budget pleine largeur */
   .budget-tables-container {
     width: 100% !important;
   }
@@ -3676,8 +3688,7 @@ html {
 
   /* --- STATS : bandeau pleine largeur --- */
   .statistics-header-gradient {
-    width: 100% !important;
-    box-sizing: border-box !important;
+    display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 0.75rem !important;
@@ -3694,6 +3705,7 @@ html {
   }
 
   .year-comparison-selector {
+    display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
     width: 100% !important;
@@ -3708,7 +3720,6 @@ html {
     min-width: 0 !important;
   }
 
-  /* Graphiques Stats pleine largeur */
   .statistics-charts-grid {
     grid-template-columns: 1fr !important;
     width: 100% !important;
@@ -3719,7 +3730,7 @@ html {
     min-width: 0 !important;
   }
 
-  /* Tableau comparatif stats : scroll horizontal */
+  /* Tableau comparatif stats */
   #statistics-tab > .card-white {
     width: 100% !important;
     overflow-x: auto !important;
@@ -3727,16 +3738,12 @@ html {
     padding: 0 !important;
   }
 
-  #statistics-tab > .card-white .header-stats-bg {
-    margin: 0 !important;
-    border-radius: 8px 8px 0 0 !important;
-  }
-
   #statistics-tab > .card-white .table-full {
+    display: table !important;
     min-width: 400px !important;
   }
 
-  /* --- CONFIG : cartes pleine largeur --- */
+  /* --- CONFIG --- */
   .settings-grid {
     grid-template-columns: 1fr !important;
     width: 100% !important;
@@ -3747,12 +3754,10 @@ html {
   }
 
   .settings-header-gradient {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    border-radius: 8px 8px 0 0 !important;
+    padding: 1rem !important;
   }
 
-  /* --- TABLEAUX : scroll horizontal fluide --- */
+  /* --- GLOBAL : forcer table partout --- */
   .table-full {
     display: table !important;
   }
