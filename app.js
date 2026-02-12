@@ -469,6 +469,7 @@ function renderBarChart(stats1, stats2, label1, label2) {
         y: {
           beginAtZero: true,
           ticks: {
+            stepSize: 500,
             callback: (value) => formatCurrency(value) + ' €'
           }
         }
@@ -541,6 +542,7 @@ function renderLineChart(stats1, stats2, label1, label2) {
         y: {
           beginAtZero: true,
           ticks: {
+            stepSize: 500,
             callback: (value) => formatCurrency(value) + ' €'
           }
         }
