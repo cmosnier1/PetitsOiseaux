@@ -3562,40 +3562,49 @@ html {
   }
 
   /* Dashboard : cartes tableaux en conteneur scrollable */
-  .dashboard-tables-grid .card-white,
-  #detailed-categories-container {
+  .dashboard-table-scroll,
+  .stats-table-scroll {
     padding: 0 !important;
     overflow-x: scroll !important;
-    overflow-y: visible !important;
     -webkit-overflow-scrolling: touch !important;
   }
 
-  /* Scrollbar visible sur mobile pour tous les conteneurs scrollables */
-  .dashboard-tables-grid .card-white::-webkit-scrollbar,
-  #detailed-categories-container::-webkit-scrollbar,
-  #statistics-tab > .card-white::-webkit-scrollbar {
+  /* Inner wrapper : header + table scrollent ensemble */
+  .dashboard-table-inner,
+  .stats-table-inner {
+    display: inline-block !important;
+    min-width: 100% !important;
+  }
+
+  /* Headers de tableaux doivent couvrir toute la largeur intérieure */
+  .dashboard-table-inner .header-recap-bg,
+  .dashboard-table-inner .header-epargne-bg,
+  .stats-table-inner .header-stats-bg {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-table-inner .table-full,
+  .stats-table-inner .table-full {
+    width: 100% !important;
+    min-width: 350px !important;
+  }
+
+  /* Scrollbar visible */
+  .dashboard-table-scroll::-webkit-scrollbar,
+  .stats-table-scroll::-webkit-scrollbar {
     height: 6px !important;
     display: block !important;
   }
-  .dashboard-tables-grid .card-white::-webkit-scrollbar-track,
-  #detailed-categories-container::-webkit-scrollbar-track,
-  #statistics-tab > .card-white::-webkit-scrollbar-track {
+  .dashboard-table-scroll::-webkit-scrollbar-track,
+  .stats-table-scroll::-webkit-scrollbar-track {
     background: #f1f1f1 !important;
     border-radius: 3px !important;
   }
-  .dashboard-tables-grid .card-white::-webkit-scrollbar-thumb,
-  #detailed-categories-container::-webkit-scrollbar-thumb,
-  #statistics-tab > .card-white::-webkit-scrollbar-thumb {
+  .dashboard-table-scroll::-webkit-scrollbar-thumb,
+  .stats-table-scroll::-webkit-scrollbar-thumb {
     background: #aaa !important;
     border-radius: 3px !important;
-  }
-
-  /* Dashboard : tableaux pleine largeur avec scroll */
-  .dashboard-tables-grid .table-full {
-    display: table !important;
-    width: 100% !important;
-    min-width: 350px !important;
-    white-space: normal !important;
   }
 
   /* En-têtes de tableaux toujours lisibles (texte sombre) */
@@ -3638,17 +3647,15 @@ html {
     justify-content: center !important;
   }
 
-  /* 3 sélecteurs sur UNE ligne, se partagent l'espace */
+  /* 3 sélecteurs sur UNE ligne, compacts */
   .transactions-header-gradient .filter-select {
-    flex: 1 1 30% !important;
+    flex: 1 1 0 !important;
     min-width: 0 !important;
-    font-size: 13px !important; /* Juste sous 16px, évite zoom iOS sur la plupart des appareils */
-    padding: 0.4rem 0.15rem !important;
+    font-size: 0.7rem !important;
+    padding: 0.35rem 0.2rem !important;
     width: auto !important;
-    white-space: nowrap !important;
-    height: 36px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    height: 34px !important;
+    text-align: center !important;
   }
 
   /* Tableau transactions pleine largeur */
@@ -3678,23 +3685,41 @@ html {
     flex-wrap: wrap !important;
     height: auto !important;
     min-height: auto !important;
-    gap: 0.3rem 0.5rem !important;
-    padding: 0.5rem 0.75rem !important;
+    gap: 0.25rem 0.5rem !important;
+    padding: 0.4rem 0.75rem !important;
     align-items: center !important;
   }
 
-  /* Titre : ne prend PAS toute la largeur, partage la ligne */
+  /* Titre : ligne 1, prend l'espace restant */
   .budget-table-wrapper .header-revenus-bg h3,
   .budget-table-wrapper .header-depenses-bg h3,
   .budget-table-wrapper .header-epargne-bg h3 {
-    flex: 0 0 auto !important;
-    font-size: 0.9rem !important;
-    margin-right: 0.25rem !important;
+    flex: 1 1 auto !important;
+    font-size: 0.85rem !important;
+    order: 0 !important;
   }
 
-  /* Liens nav : inline, wrappent naturellement */
+  /* Bouton copier : ligne 1, à droite du titre */
+  .budget-table-wrapper .btn-copy-budget {
+    flex: 0 0 auto !important;
+    font-size: 0.6rem !important;
+    padding: 0.15rem 0.35rem !important;
+    opacity: 0.7 !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    gap: 0.2rem !important;
+    order: 0 !important;
+  }
+
+  .budget-table-wrapper .btn-copy-budget svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  /* Liens nav : ligne 2, pleine largeur */
   .budget-table-wrapper .table-nav-links {
-    flex: 1 1 auto !important;
+    flex: 0 0 100% !important;
+    order: 1 !important;
     margin-left: 0 !important;
     display: flex !important;
     flex-wrap: wrap !important;
@@ -3702,35 +3727,8 @@ html {
   }
 
   .budget-table-wrapper .table-nav-link {
-    font-size: 0.65rem !important;
-    padding: 0.15rem 0.4rem !important;
-  }
-
-  /* Bouton copier discret */
-  .budget-table-wrapper .btn-copy-budget {
-    font-size: 0.65rem !important;
-    padding: 0.2rem 0.4rem !important;
-    opacity: 0.6 !important;
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    gap: 0.25rem !important;
-  }
-
-  .budget-table-wrapper .btn-copy-budget svg {
-    width: 12px !important;
-    height: 12px !important;
-  }
-
-  /* Colonne catégorie plus étroite */
-  .budget-table-compact td.category-col,
-  .budget-table-compact th.category-col {
-    font-size: 0.65rem !important;
-    padding-left: 0.5rem !important;
-    width: 100px !important;
-    max-width: 100px !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-    line-height: 1.2 !important;
+    font-size: 0.6rem !important;
+    padding: 0.12rem 0.35rem !important;
   }
 
   .budget-tables-container {
@@ -3788,14 +3786,14 @@ html {
   }
 
   /* Tableau comparatif stats */
-  #statistics-tab > .card-white {
+  .stats-table-scroll {
     width: 100% !important;
     overflow-x: scroll !important;
     -webkit-overflow-scrolling: touch !important;
     padding: 0 !important;
   }
 
-  #statistics-tab > .card-white .table-full {
+  .stats-table-inner .table-full {
     display: table !important;
     min-width: 400px !important;
   }
