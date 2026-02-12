@@ -68,8 +68,45 @@ function initApp() {
   setupEventListeners();
   loadUserData();
   updateDisplay();
+  initStatisticsDefaults();
   // Initialiser Firebase (la sync démarre après connexion Google)
   if (typeof initFirebase === 'function') initFirebase();
+}
+
+function initStatisticsDefaults() {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  
+  // Mois précédent (gère le passage d'année)
+  let prevMonth = currentMonth - 1;
+  let prevYear = currentYear;
+  if (prevMonth < 0) {
+    prevMonth = 11;
+    prevYear = currentYear - 1;
+  }
+  
+  // Activer le mode "Par Mois"
+  document.querySelectorAll('.stats-mode-btn').forEach(b => b.classList.remove('active'));
+  const monthBtn = document.getElementById('stats-mode-month');
+  if (monthBtn) monthBtn.classList.add('active');
+  
+  // Afficher les sélecteurs de mois
+  document.querySelectorAll('.stats-month-select').forEach(sel => {
+    sel.style.display = 'inline-block';
+  });
+  
+  // Sélection 1 : mois en cours, année en cours
+  const y1 = document.getElementById('compare-year-1');
+  const m1 = document.getElementById('compare-month-1');
+  if (y1) y1.value = String(currentYear);
+  if (m1) m1.value = String(currentMonth);
+  
+  // Sélection 2 : mois précédent
+  const y2 = document.getElementById('compare-year-2');
+  const m2 = document.getElementById('compare-month-2');
+  if (y2) y2.value = String(prevYear);
+  if (m2) m2.value = String(prevMonth);
 }
 
 // ============================================
@@ -1355,7 +1392,8 @@ function renderDetailedCategoriesTable(stats) {
     detailedContainer.id = 'detailed-categories-container';
     detailedContainer.className = 'card-white';
     detailedContainer.style.marginTop = '1.5rem';
-    detailedContainer.style.width = '100%'; // Pleine largeur
+    detailedContainer.style.width = '100%';
+    detailedContainer.style.overflowX = 'auto';
     
     // Insérer APRÈS la grille (pas dedans)
     tablesGrid.parentNode.insertBefore(detailedContainer, tablesGrid.nextSibling);
