@@ -1390,10 +1390,9 @@ function renderDetailedCategoriesTable(stats) {
     // Créer la carte pour le tableau détaillé
     detailedContainer = document.createElement('div');
     detailedContainer.id = 'detailed-categories-container';
-    detailedContainer.className = 'card-white';
+    detailedContainer.className = 'card-white dashboard-table-scroll';
     detailedContainer.style.marginTop = '1.5rem';
     detailedContainer.style.width = '100%';
-    detailedContainer.style.overflowX = 'auto';
     
     // Insérer APRÈS la grille (pas dedans)
     tablesGrid.parentNode.insertBefore(detailedContainer, tablesGrid.nextSibling);
@@ -1401,6 +1400,7 @@ function renderDetailedCategoriesTable(stats) {
   
   // Construire le HTML du tableau détaillé
   let html = `
+    <div class="dashboard-table-inner">
     <div class="header-recap-bg" style="background-color: var(--color-epargne);">
       <h3 class="title-white-semibold">Détails par Catégorie</h3>
     </div>
@@ -1477,6 +1477,7 @@ function renderDetailedCategoriesTable(stats) {
   html += `
       </tbody>
     </table>
+    </div>
   `;
   
   detailedContainer.innerHTML = html;
@@ -1833,7 +1834,7 @@ function updateCategoryFilter() {
   
   const selectedType = state.filterType;
   
-  filterCategory.innerHTML = '<option value="all">Toutes les catégories</option>';
+  filterCategory.innerHTML = '<option value="all">Catégories ▾</option>';
   
   if (selectedType === 'all') {
     const allCategories = new Set();
