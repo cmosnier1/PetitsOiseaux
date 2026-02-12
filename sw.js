@@ -1,4 +1,4 @@
-const CACHE_NAME = 'budget-cache-v13.0';
+const CACHE_NAME = 'budget-cache-v14.0';
 const urlsToCache = [
   './',
   './index.html',
